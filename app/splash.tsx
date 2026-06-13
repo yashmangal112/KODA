@@ -1,23 +1,37 @@
-import LottieView from 'lottie-react-native';
-import { router } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { router } from "expo-router";
+import { useEffect, useRef, useState } from "react";
+import { StyleSheet, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { colors } from '@/constants/theme';
-import { resolvePostSplashRoute } from '@/lib/navigation';
+import { KodaWordmark } from "@/components/KodaWordmark";
+import { SplashAmbientGlow } from "@/components/splash/SplashAmbientGlow";
+import { SplashFooter } from "@/components/splash/SplashFooter";
+import { SplashRippleRings } from "@/components/splash/SplashRippleRings";
+import { SplashWordmarkSection } from "@/components/splash/SplashWordmarkSection";
+import { colors, spacing, splash as splashTheme } from "@/constants/theme";
+import { resolvePostSplashRoute } from "@/lib/navigation";
+import ListeningGlowBackground  from '@/components/CinematicBackground';
 
-const MIN_ANIMATION_MS = 1500;
+
+const MIN_ANIMATION_MS = splashTheme.minReadyMs;
 
 export default function SplashScreen() {
+  const insets = useSafeAreaInsets();
   const [animationDone, setAnimationDone] = useState(false);
-  const [route, setRoute] = useState<{ href: string; minSplashMs: number } | null>(
-    null,
-  );
+  const [route, setRoute] = useState<{
+    href: string;
+    minSplashMs: number;
+  } | null>(null);
   const startTimeRef = useRef(Date.now());
   const navigatedRef = useRef(false);
 
   useEffect(() => {
     resolvePostSplashRoute().then(setRoute);
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setAnimationDone(true), MIN_ANIMATION_MS);
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
@@ -38,13 +52,26 @@ export default function SplashScreen() {
 
   return (
     <View style={styles.container}>
-      <LottieView
-        source={require('@/assets/lottie/koda_logo.json')}
-        autoPlay
-        loop={false}
-        style={styles.lottie}
-        onAnimationFinish={() => setAnimationDone(true)}
-      />
+      {/* <SplashAmbientGlow /> */}
+      <ListeningGlowBackground/>
+
+      <View style={[styles.main, { paddingHorizontal: spacing.marginPage }]}>
+        <View style={styles.focal}>
+          <SplashRippleRings />
+          <KodaWordmark scale={1.25} />
+        </View>
+
+        <SplashWordmarkSection />
+      </View>
+
+      <View
+        style={[
+          styles.footerWrap,
+          { paddingBottom: insets.bottom + spacing.marginPage },
+        ]}
+      >
+        <SplashFooter />
+      </View>
     </View>
   );
 }
@@ -53,11 +80,26 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
-    alignItems: 'center',
-    justifyContent: 'center',
+    overflow: "hidden",
   },
-  lottie: {
-    width: 220,
-    height: 220,
+  main: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 10,
+    gap: spacing.stackXl,
+  },
+  focal: {
+    width: splashTheme.focalSize,
+    height: splashTheme.focalSize,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  footerWrap: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
   },
 });

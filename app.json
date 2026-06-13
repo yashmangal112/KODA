@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "oioioioi",
+    "scheme": "koda",
     "userInterfaceStyle": "dark",
     "ios": {
       "supportsTablet": true
@@ -17,7 +17,7 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "package": "com.anonymous.koda"
     },
     "web": {
       "bundler": "metro",
@@ -33,10 +33,19 @@
           "resizeMode": "contain",
           "backgroundColor": "#0D0D0D"
         }
-      ]
+      ],
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "0fa903ad-74eb-49f4-ae54-9673c3e105ca"
+      }
     }
   }
 }

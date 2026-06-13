@@ -29,18 +29,40 @@ api.interceptors.request.use(async (config) => {
   return config;
 });
 
+const AUTH_PUBLIC_PATHS = [
+  '/api/v1/auth/login',
+  '/api/v1/auth/register',
+  '/api/v1/auth/verify-otp',
+  '/api/v1/auth/resend-otp',
+];
+
+function isPublicAuthRequest(url) {
+  if (!url) return false;
+  return AUTH_PUBLIC_PATHS.some((path) => url.includes(path));
+}
+
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if (response.data?.success && response.data?.data !== undefined) {
+      response.data = response.data.data;
+    }
+    return response;
+  },
   async (error) => {
+    const requestUrl = error.config?.url ?? '';
+
     if (!error.response) {
       onNetworkError?.();
       return Promise.reject(error);
     }
 
-    if (error.response.status === 401) {
-      await clearAuthToken();
-      onUnauthorized?.();
-      router.replace('/(auth)/login');
+    if (error.response.status === 401 && !isPublicAuthRequest(requestUrl)) {
+      const token = await getAuthToken();
+      if (token) {
+        await clearAuthToken();
+        onUnauthorized?.();
+        router.replace('/(auth)/login');
+      }
     }
 
     return Promise.reject(error);

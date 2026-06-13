@@ -58,7 +58,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       ? colors.success
       : toast?.type === 'error'
         ? colors.danger
-        : colors.surface;
+        : colors.surfaceHighest;
 
   return (
     <ToastContext.Provider value={value}>

@@ -47,6 +47,10 @@ export async function setPendingVerification(pending) {
   return removeItem(STORAGE_KEYS.PENDING_VERIFICATION);
 }
 
+export async function getUserEmail() {
+  return getItem(STORAGE_KEYS.USER_EMAIL);
+}
+
 export async function clearSession() {
   await Promise.all([
     clearAuthToken(),

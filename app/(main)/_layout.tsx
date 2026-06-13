@@ -10,9 +10,10 @@ export default function MainLayout() {
     return null;
   }
 
-  if (!isAuthenticated) {
-    return <Redirect href="/(auth)/login" />;
-  }
+  // TODO: Uncomment it after api integrations are done. For now, we want to bypass token validation to speed up development.
+  // if (!isAuthenticated) {
+  //   return <Redirect href="/(auth)/login" />;
+  // }
 
   if (pendingVerification) {
     return <Redirect href="/(auth)/verify-token" />;

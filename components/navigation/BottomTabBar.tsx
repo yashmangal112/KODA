@@ -1,109 +1,248 @@
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { BlurView } from 'expo-blur';
+import { Pressable, StyleSheet, View, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 
-import { colors, layout, radii, typography } from '@/constants/theme';
+import { colors, layout } from '@/constants/theme';
 
-const TAB_CONFIG = {
-  index: { label: 'MEETINGS', icon: 'chatbubble-outline' as const },
-  record: { label: 'RECORD', icon: 'mic' as const },
-  settings: { label: 'SETTINGS', icon: 'options-outline' as const },
-};
+const ACTIVE_TAB = '#ffb4a4';
+const FAB_COLOR = colors.brandOrange;
 
-export function BottomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
+const INACTIVE = '#fadbd4ff';
+const SURFACE = 'rgba(19,19,19,0.82)';
+
+export function BottomTabBar({
+  state,
+  navigation,
+}: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
 
+  const currentRoute = state.routes[state.index].name;
+  const isRecordScreen = currentRoute === 'record';
+
   return (
-    <View style={[styles.wrapper, { paddingBottom: Math.max(insets.bottom, 8) }]}>
-      <View style={styles.bar}>
-        {state.routes.map((route, index) => {
-          const isFocused = state.index === index;
-          const config = TAB_CONFIG[route.name as keyof typeof TAB_CONFIG];
-          const color = isFocused ? colors.brandOrange : colors.muted;
+    <View
+      pointerEvents="box-none"
+      style={[
+        styles.outer
+      ]}
+    >
+      <BlurView
+        intensity={40}
+        tint="dark"
+        style={styles.blur}
+      >
+        <View style={styles.inner}>
+          {/* Meetings */}
+          <TabButton
+            icon="chat-bubble"
+            active={currentRoute === 'index'}
+            onPress={() => navigation.navigate('index')}
+          />
 
-          if (route.name === 'record') {
-            return (
-              <View key={route.key} style={styles.centerSlot}>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityState={isFocused ? { selected: true } : {}}
-                  onPress={() => navigation.navigate(route.name)}
-                  style={styles.recordButton}
-                >
-                  <Ionicons name="mic" size={28} color={colors.white} />
-                </Pressable>
-                {isFocused ? <View style={styles.recordDot} /> : null}
-              </View>
-            );
-          }
+          {/* Center */}
+          {isRecordScreen ? (
+            <InlineMicButton />
+          ) : (
+            <FloatingMicButton
+              onPress={() => navigation.navigate('record')}
+            />
+          )}
 
-          return (
-            <Pressable
-              key={route.key}
-              accessibilityRole="button"
-              accessibilityState={isFocused ? { selected: true } : {}}
-              onPress={() => navigation.navigate(route.name)}
-              style={styles.tab}
-            >
-              <Ionicons name={config.icon} size={22} color={color} />
-              <Text style={[styles.tabLabel, { color }]}>{config.label}</Text>
-            </Pressable>
-          );
-        })}
-      </View>
+          {/* Settings */}
+          <TabButton
+            icon="tune"
+            active={currentRoute === 'settings'}
+            onPress={() => navigation.navigate('settings')}
+          />
+        </View>
+      </BlurView>
     </View>
   );
 }
 
+/* ───────────────────────────────────────── */
+/* Normal tabs */
+/* ───────────────────────────────────────── */
+
+function TabButton({
+  icon,
+  active,
+  onPress,
+}: {
+  icon: keyof typeof MaterialIcons.glyphMap;
+  active: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ hovered, pressed }) => [
+        styles.tabButton,
+        hovered && styles.hovered,
+        pressed && styles.pressed,
+      ]}
+    >
+      <MaterialIcons
+        name={icon}
+        size={26}
+        color={active ? ACTIVE_TAB : INACTIVE}
+      />
+    </Pressable>
+  );
+}
+
+/* ───────────────────────────────────────── */
+/* Floating mic */
+/* ───────────────────────────────────────── */
+
+function FloatingMicButton({
+  onPress,
+}: {
+  onPress: () => void;
+}) {
+  return (
+    <View style={styles.fabWrapper}>
+      <Pressable
+        onPress={onPress}
+        style={({ hovered, pressed }) => [
+          styles.fab,
+          hovered && styles.fabHover,
+          pressed && styles.fabPressed,
+        ]}
+      >
+        <MaterialIcons
+          name="mic"
+          size={32}
+          color= {colors.orangeDark}
+        />
+      </Pressable>
+    </View>
+  );
+}
+
+/* ───────────────────────────────────────── */
+/* Inline active mic */
+/* ───────────────────────────────────────── */
+
+function InlineMicButton() {
+  return (
+    <View style={styles.inlineMic}>
+      <MaterialIcons
+        name="mic"
+        size={30}
+        color={FAB_COLOR}
+      />
+
+      <View style={styles.inlineDot} />
+    </View>
+  );
+}
+
+/* ───────────────────────────────────────── */
+/* Styles */
+/* ───────────────────────────────────────── */
+
 const styles = StyleSheet.create({
-  wrapper: {
-    backgroundColor: colors.background,
+  outer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    overflow: 'visible',
+  },
+
+  blur: {
+    width: '100%',
     borderTopWidth: 1,
-    borderTopColor: colors.navBorder,
+    borderTopColor: 'rgba(91,64,59,0.15)',
+    backgroundColor: SURFACE,
+    overflow: 'visible',
   },
-  bar: {
+
+  inner: {
+    height: layout.tabBarHeight,
     flexDirection: 'row',
-    alignItems: 'flex-end',
+    alignItems: 'center',
     justifyContent: 'space-around',
-    minHeight: layout.tabBarHeight,
-    paddingTop: 8,
+    paddingHorizontal: 16,
   },
-  tab: {
-    flex: 1,
+
+  tabButton: {
+    width: 52,
+    height: 52,
+    borderRadius: 999,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
-    paddingBottom: 6,
+
+    transitionDuration: '300ms' as any,
   },
-  tabLabel: {
-    fontFamily: typography.fontFamily.medium,
-    fontSize: 10,
-    letterSpacing: 0.6,
+
+  hovered: {
+    transform: [{ scale: 1.1 }],
   },
-  centerSlot: {
-    flex: 1,
-    alignItems: 'center',
-    marginTop: -28,
+
+  pressed: {
+    transform: [{ scale: 0.95 }],
   },
-  recordButton: {
-    width: layout.recordButtonSize,
-    height: layout.recordButtonSize,
-    borderRadius: radii.pill,
-    backgroundColor: colors.brandOrange,
+
+  /* Floating FAB */
+
+  fabWrapper: {
+    marginTop: -48,
+  },
+
+  fab: {
+    width: 64,
+    height: 64,
+    borderRadius: 999,
+
+    backgroundColor: FAB_COLOR,
+
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: colors.brandOrange,
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 8,
+
+    shadowColor: ACTIVE_TAB,
+    shadowOpacity: 0.28,
+    shadowRadius: 20,
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+
+    elevation: 12,
+
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+
+    transitionDuration: '300ms' as any,
   },
-  recordDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: colors.brandOrange,
-    marginTop: 6,
+
+  fabHover: {
+    transform: [{ scale: 1.05 }],
+  },
+
+  fabPressed: {
+    transform: [{ scale: 0.94 }],
+  },
+
+  /* Inline mic */
+
+  inlineMic: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  inlineDot: {
+    position: 'absolute',
+    bottom: -8,
+
+    width: 4,
+    height: 4,
+    borderRadius: 999,
+
+    backgroundColor: FAB_COLOR,
   },
 });
