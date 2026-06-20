@@ -11,12 +11,10 @@
       "supportsTablet": true
     },
     "android": {
-      "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
-      },
+       "adaptiveIcon": {
+          "foregroundImage": "./assets/images/icon.png",
+          "backgroundColor": "#0D0D0D"
+        },
       "package": "com.anonymous.koda"
     },
     "web": {
