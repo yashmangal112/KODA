@@ -155,10 +155,10 @@ Full interactive docs available at `/docs` when running locally.
 - [x] Jira integration with smart cache layer
 - [x] Slack + Notion integrations
 - [x] Device pairing system (two-table architecture)
-- [ ] React Native app — all screens
-- [ ] ESP32-S3 device firmware
-- [ ] WebSocket live transcript streaming
-- [ ] Celery beat — Jira cache refresh
+- [x] React Native app — all screens
+- [x] ESP32-S3 device firmware
+- [x] WebSocket live transcript streaming
+- [x] Celery beat — Jira cache refresh
 - [ ] App Store + Play Store launch
 - [ ] First production batch — 100 devices
 - [ ] Jira Marketplace listing
